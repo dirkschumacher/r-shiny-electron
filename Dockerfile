@@ -1,4 +1,4 @@
-FROM rocker/r-ver:3.5.1
+FROM rocker/rstudio:3.5.1
 MAINTAINER noam.ross@gmail.com
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
        libssl1.0-dev \
        zlib1g-dev \
        nodejs \
- && npm install -g npm electron-forge \
+ && npm install -g npm \
  && wget https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/xar/xar-1.5.2.tar.gz \
  && tar -zxvf xar-1.5.2.tar.gz \
  && cd xar-1.5.2 && ./configure && make && make install \
