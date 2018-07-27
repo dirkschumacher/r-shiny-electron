@@ -34,8 +34,8 @@
       "electronInstallerDebian": {},
       "electronInstallerRedhat": {},
       "github_repository": {
-        "owner": "",
-        "name": ""
+        "owner": "dirkschumacher",
+        "name": "r-shiny-electron"
       },
       "windowsStoreConfig": {
         "packageName": "",
