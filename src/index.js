@@ -55,7 +55,10 @@ const startWebserver = async (attempt, progressCallback) => {
       'R_LIBS': lib_path,
       'R_LIBS_SITE': lib_path,
       'R_LIB_PATHS': lib_path} })
-      .catch(console.log)
+      .catch(console.error)
+
+  // TODO: handle the case the port is taken and 
+  // shiny fails
   
   let url = `http://127.0.0.1:${shinyPort}`
   for(let i = 0; i <= 10; i++) {
@@ -97,7 +100,7 @@ const createWindow = () => {
   mainWindow.loadURL(shinyUrl)
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools()
+  mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
