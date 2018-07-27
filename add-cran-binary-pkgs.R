@@ -1,6 +1,8 @@
 # Script to find dependencies of a pkg list, download binaries and put them
 # In the standalone R library.  Currently just for shiny/mac
 
+options(repos = "https://cran.r-project.org")
+
 install_bins <- function(cran_pkgs, library_path, type, decompress) {
   installed <- list.files(library_path)
   cran_to_install <- sort(setdiff(
