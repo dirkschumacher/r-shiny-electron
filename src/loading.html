@@ -3,8 +3,38 @@
   <head>
     <meta charset="utf-8">
     <title></title>
+    <link rel="stylesheet" href="loading.css" media="all">
   </head>
   <body>
-    Loading, please wait!!
+    <div id="loading-spinner" class="spinner">
+      <div class="rect1"></div>
+      <div class="rect2"></div>
+      <div class="rect3"></div>
+      <div class="rect4"></div>
+      <div class="rect5"></div>
+    </div>
+    <div id="status">
+
+    </div>
+    <script>
+      let electron = require('electron')
+      electron.ipcRenderer.on('start-webserver-event', (event, message) => {
+        // here we can inform about the loading process
+        if (message.attempt >= 1) {
+          let el = document.getElementById('status')
+          el.innerHTML = `
+            <p>It takes longer than expected. Please wait a little more.</p>
+          `
+        }
+      })
+      electron.ipcRenderer.on('failed', (event, _) => {
+        let el = document.getElementById('status')
+        el.innerHTML = `
+          <h1>Failure</h1>
+          <p>We could not start the shiny application. Please report this issue to the developers of this application.</p>
+        `
+        document.getElementById('loading-spinner').innerHTML = ''
+      })
+    </script>
   </body>
 </html>

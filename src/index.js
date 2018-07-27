@@ -4,12 +4,11 @@ import execa from 'execa'
 import path from 'path'
 import http from 'axios'
 
-const shiny_port = 4539
-
 const rpath = path.join(app.getAppPath(), 'r-mac')
 const lib_path = path.join(app.getAppPath(), 'r-mac', 'library')
 const rscript = path.join(app.getAppPath(), 'r-mac', 'bin', 'Rscript')
 
+const backgroundColor = '#2c3e50'
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -23,27 +22,60 @@ const ayncWait = (milliseconds) => {
   })
 }
 
+const randomInt = (min, max) => {
+  return Math.round(Math.random() * ((max + 1) - min) + min)
+}
+
+const randomPort = () => {
+  // Those forbidden ports are in line with shiny
+  // https://github.com/rstudio/shiny/blob/288039162086e183a89523ac0aacab824ef7f016/R/server.R#L734
+  const forbiddenPorts = [3659, 4045, 6000, 6665, 6666, 6667, 6668, 6669, 6697]
+
+  while(true) {
+    let port = randomInt(3000, 8000)
+    if (forbiddenPorts.includes(port)) continue
+    return port
+  }
+}
+
 // Start the webserver
-const startWebserver = async () => {
+const startWebserver = async (attempt, progressCallback) => {
+
+  if (attempt > 3) {
+    await progressCallback({attempt: attempt, code: 'failed'})
+    throw 'Cannot start webserver'
+  }
+
+  let shinyPort = randomPort()
+
+  await progressCallback({attempt: attempt, code: 'start'})
   execa(rscript, 
-    ['--vanilla', '-e', `shiny::runApp(file.path('shiny'), port=${shiny_port})`],
+    ['--vanilla', '-e', `shiny::runApp(file.path('shiny'), port=${shinyPort})`],
     { env: {
-      "R_LIBS": lib_path,
-      "R_LIBS_SITE": lib_path,
-      "R_LIB_PATHS": lib_path} }).catch(console.error)
-  let url = `http://127.0.0.1:${shiny_port}`
+      'R_LIBS': lib_path,
+      'R_LIBS_SITE': lib_path,
+      'R_LIB_PATHS': lib_path} })
+      .catch(console.log)
+  
+  let url = `http://127.0.0.1:${shinyPort}`
   for(let i = 0; i <= 10; i++) {
-    await ayncWait(1000)
+    await progressCallback({attempt: attempt, code: 'waiting'})
+    await ayncWait(500)
     try{
       const res = await http.head(url, {timeout: 1000})
-      if (res.status == 200) return url
+      if (res.status == 200) {
+        await progressCallback({attempt: attempt, code: 'success'})
+        return url
+      } 
     } catch (e) {
+
     }
   }
-  // if process is finished,
-  // increate port counter and try again
-  // TODO: handle fail
-  return url
+  await progressCallback({attempt: attempt, code: 'notresponding'})
+
+  // kill process
+  // not sure execa is the right package for it
+  return await startWebserver(attempt + 1, progressCallback)
 }
 
 // Keep a global reference of the window object, if you don't, the window will
@@ -65,7 +97,7 @@ const createWindow = () => {
   mainWindow.loadURL(shinyUrl)
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 
   // Emitted when the window is closed.
   mainWindow.on('closed', () => {
@@ -97,14 +129,21 @@ app.on('ready', async () => {
       callback(false);
     });
   
-    splashScreen = new BrowserWindow({width: 800, height: 600})
+    splashScreen = new BrowserWindow({width: 800, height: 600, backgroundColor: backgroundColor})
     splashScreen.loadURL(`file://${__dirname}/loading.html`)
-    console.log("wat")
-    shinyUrl = await startWebserver()
-    createWindow()
     
-    splashScreen.destroy()
-    mainWindow.show()  
+    // pass the loading events down to the splashScreen window
+    const progressCallback = async (event) => {
+      await splashScreen.webContents.send('start-webserver-event', event)
+    }
+    try {
+      shinyUrl = await startWebserver(0, progressCallback)
+      createWindow()
+      splashScreen.destroy()
+      mainWindow.show()
+    } catch(e) {
+      await splashScreen.webContents.send('failed')
+    }
 })
 
 // Quit when all windows are closed.
@@ -123,6 +162,3 @@ app.on('activate', () => {
     createWindow();
   }
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.
