@@ -5,6 +5,7 @@ import path from 'path'
 import http from 'axios'
 
 const rpath = path.join(app.getAppPath(), 'r-mac')
+const shinyAppPath = path.join(app.getAppPath(), 'shiny')
 const libPath = path.join(rpath, 'library')
 const rscript = path.join(rpath, 'bin', 'Rscript')
 
@@ -49,7 +50,7 @@ const startWebserver = async (attempt, progressCallback) => {
 
   await progressCallback({attempt: attempt, code: 'start'})
   execa(rscript,
-    ['--vanilla', '-e', `shiny::runApp(file.path('shiny'), port=${shinyPort})`],
+    ['--vanilla', '-e', `shiny::runApp('${shinyAppPath}', port=${shinyPort})`],
     { env: {
       'R_LIBS': libPath,
       'R_LIBS_SITE': libPath,
