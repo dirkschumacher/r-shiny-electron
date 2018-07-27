@@ -23,10 +23,6 @@
         ],
         "darwin": [
           "zip"
-        ],
-        "linux": [
-          "deb",
-          "rpm"
         ]
       },
       "electronPackagerConfig": {
