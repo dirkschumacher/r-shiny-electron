@@ -4,10 +4,13 @@ import execa from 'execa'
 import path from 'path'
 import http from 'axios'
 
-const rpath = path.join(app.getAppPath(), 'r-mac')
-const shinyAppPath = path.join(app.getAppPath(), 'shiny')
+let rPath = 'r-mac'
+// TODO: detect at runtime which platform we have
+const rpath = path.join(app.getAppPath(), rPath)
 const libPath = path.join(rpath, 'library')
 const rscript = path.join(rpath, 'bin', 'Rscript')
+
+const shinyAppPath = path.join(app.getAppPath(), 'shiny')
 
 const backgroundColor = '#2c3e50'
 
