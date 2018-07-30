@@ -5,7 +5,7 @@ set -e
 # Requires xar and cpio, both installed in the Dockerfile
 mkdir -p r-mac
 curl -o r-mac/latest_r.pkg \
-     https://cran.r-project.org/bin/macosx/R-3.5.1.pkg
+     https://cloud.r-project.org/bin/macosx/R-3.5.1.pkg
 
 cd r-mac
 xar -xf latest_r.pkg
