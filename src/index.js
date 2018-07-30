@@ -3,8 +3,17 @@ import { app, session, BrowserWindow } from 'electron'
 import execa from 'execa'
 import path from 'path'
 import http from 'axios'
+import os from 'os'
 
-let rPath = 'r-mac'
+let rPath
+if (os.platform() === 'win32') {
+  rPath = 'r-win'
+} else if (os.platform() === 'darwin') {
+  rPath = 'r-mac'
+} else {
+  throw new Error("OS not supported")
+}
+
 // TODO: detect at runtime which platform we have
 const rpath = path.join(app.getAppPath(), rPath)
 const libPath = path.join(rpath, 'library')
