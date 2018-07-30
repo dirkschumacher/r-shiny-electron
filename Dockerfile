@@ -26,5 +26,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && tar -xvzf innoextract-1.7.tar.gz \
  && mkdir -p innoextract-1.7/build && cd innoextract-1.7/build \
  && cmake .. && make && make install && cd ../.. && rm -rf innoextract-1.7 innoextract-1.7.tar.gz 
+ && install2.r automagic
  
 

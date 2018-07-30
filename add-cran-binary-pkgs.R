@@ -1,7 +1,12 @@
 # Script to find dependencies of a pkg list, download binaries and put them
-# In the standalone R library.  Currently just for shiny/mac
+# In the standalone R library.
 
-options(repos = "https://cran.r-project.org")
+options(repos = "https://cloud.r-project.org")
+
+cran_pkgs <- unique(c(
+  "shiny",
+  automagic::get_dependent_packages("shiny")
+))
 
 install_bins <- function(cran_pkgs, library_path, type, decompress) {
   installed <- list.files(library_path)
