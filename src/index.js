@@ -52,12 +52,15 @@ const startWebserver = async (attempt, progressCallback) => {
   let shinyPort = randomPort()
 
   await progressCallback({attempt: attempt, code: 'start'})
+  // changing .lib.loc - same strategy as the checkpoint package
+  const rCode = `assign('.lib.loc', '${libPath}', envir = environment(.libPaths));library(methods);shiny::runApp('${shinyAppPath}', port=${shinyPort})`
   execa(rscript,
-    ['--vanilla', '-e', `shiny::runApp('${shinyAppPath}', port=${shinyPort})`],
+    ['--vanilla', '-e', rCode],
     { env: {
       'R_LIBS': libPath,
+      'R_LIBS_USER': libPath,
       'R_LIBS_SITE': libPath,
-      'R_LIB_PATHS': libPath} })
+      'R_LIB_PATHS': libPath} }) // which ones do we actually need?
     .catch(console.error)
 
   // TODO: handle the case the port is taken and
