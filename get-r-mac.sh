@@ -16,3 +16,4 @@ rm -r r.pkg R.framework
 
 # Remove unneccessary files TODO: What else
 rm -r doc tests
+rm -r lib/*.dSYM 

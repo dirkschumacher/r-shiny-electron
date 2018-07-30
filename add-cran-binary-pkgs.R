@@ -11,7 +11,9 @@ cran_pkgs <- unique(c(
 ))
 
 install_bins <- function(cran_pkgs, library_path, type, decompress,
-                         remove_dirs = c("help", "doc", "tests", "html", "include")) {
+                         remove_dirs = c("help", "doc", "tests", "html",
+                                         "include", "unitTests",
+                                         file.path("libs", "*dSYM"))) {
   
   installed <- list.files(library_path)
   cran_to_install <- sort(setdiff(
@@ -22,7 +24,6 @@ install_bins <- function(cran_pkgs, library_path, type, decompress,
     installed))
   if(!length(cran_to_install)) {
     message("No packages to install")
-    return(invisible(NULL))
   } else {
     td <- tempdir()
     downloaded <- download.packages(cran_to_install, destdir = td, type=type)
