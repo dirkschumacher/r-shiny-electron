@@ -20,7 +20,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 }
 
 // Wait asnychronously
-const ayncWait = (milliseconds) => {
+const waitFor = (milliseconds) => {
   return new Promise((resolve, reject) => {
     setTimeout(resolve, milliseconds)
   })
@@ -69,7 +69,7 @@ const startWebserver = async (attempt, progressCallback) => {
   let url = `http://127.0.0.1:${shinyPort}`
   for (let i = 0; i <= 10; i++) {
     await progressCallback({attempt: attempt, code: 'waiting'})
-    await ayncWait(500)
+    await waitFor(500)
     try {
       const res = await http.head(url, {timeout: 1000})
       if (res.status === 200) {
