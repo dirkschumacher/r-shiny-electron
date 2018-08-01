@@ -21,11 +21,14 @@ module.exports = async (buildPath, _electronVersion, platform, _arch, callback) 
   } else {
     throw new Error('Platform is not supported')
   }
-  await tryRemove(path.join(buildPath, 'prune-r.js'))
-  await tryRemove(path.join(buildPath, 'get-r-mac.sh'))
-  await tryRemove(path.join(buildPath, 'get-r-win.sh'))
-  await tryRemove(path.join(buildPath, 'Dockerfile'))
-  await tryRemove(path.join(buildPath, 'add-cran-binary-pkgs.R'))
-
+  await Promise.all(
+    [
+      tryRemove(path.join(buildPath, 'prune-r.js')),
+      tryRemove(path.join(buildPath, 'get-r-mac.sh')),
+      tryRemove(path.join(buildPath, 'get-r-win.sh')),
+      tryRemove(path.join(buildPath, 'Dockerfile')),
+      tryRemove(path.join(buildPath, 'add-cran-binary-pkgs.R'))
+    ]
+  )
   callback()
 }
