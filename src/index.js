@@ -75,12 +75,14 @@ const startWebserver = async (attempt, progressCallback) => {
   // TODO: handle the case the port is taken and
   // shiny fails
 
+
   let url = `http://127.0.0.1:${shinyPort}`
   for (let i = 0; i <= 10; i++) {
     await progressCallback({attempt: attempt, code: 'waiting'})
     await waitFor(500)
     try {
       const res = await http.head(url, {timeout: 1000})
+      // TODO: check that it is really shiny and not some other webserver
       if (res.status === 200) {
         await progressCallback({attempt: attempt, code: 'success'})
         return url
