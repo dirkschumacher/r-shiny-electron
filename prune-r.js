@@ -21,14 +21,12 @@ module.exports = async (buildPath, _electronVersion, platform, _arch, callback) 
   } else {
     throw new Error('Platform is not supported')
   }
-  await Promise.all(
-    [
-      tryRemove(path.join(buildPath, 'prune-r.js')),
-      tryRemove(path.join(buildPath, 'get-r-mac.sh')),
-      tryRemove(path.join(buildPath, 'get-r-win.sh')),
-      tryRemove(path.join(buildPath, 'Dockerfile')),
-      tryRemove(path.join(buildPath, 'add-cran-binary-pkgs.R'))
-    ]
-  )
+  const filesToDelete = ['prune-r.js',
+                         'get-r-mac.sh',
+                         'get-r-win.sh',
+                         'Dockerfile',
+                         'add-cran-binary-pkgs.R']
+  const deleteAllFiles = filesToDelete.map((f) => path.join(buildPath, f)).map(tryRemove)
+  await Promise.all(deleteAllFiles)
   callback()
 }
