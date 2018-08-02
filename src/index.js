@@ -67,6 +67,7 @@ const startWebserver = async (attempt, progressCallback) => {
     ['--vanilla', '-e', rCode],
     { env: {
       'RHOME': rpath,
+      'R_HOME_DIR': rpath,
       'R_LIBS': libPath,
       'R_LIBS_USER': libPath,
       'R_LIBS_SITE': libPath,
