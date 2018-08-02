@@ -18,9 +18,10 @@
     </div>
     <script>
       let electron = require('electron')
+      let failed = false
       electron.ipcRenderer.on('start-webserver-event', (event, message) => {
         // here we can inform about the loading process
-        if (message.attempt >= 1) {
+        if (!failed && message.attempt >= 1) {
           let el = document.getElementById('status')
           el.innerHTML = `
             <p>It takes longer than expected. Please wait a little more.</p>
@@ -34,6 +35,7 @@
           <p>We could not start the shiny application. Please report this issue to the developers of this application.</p>
         `
         document.getElementById('loading-spinner').innerHTML = ''
+        failed = true
       })
     </script>
   </body>
