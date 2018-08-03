@@ -15,7 +15,6 @@ if (os.platform() === 'win32') {
   throw new Error("OS not supported")
 }
 
-// TODO: detect at runtime which platform we have
 const rpath = path.join(app.getAppPath(), rPath)
 const libPath = path.join(rpath, 'library')
 const rscript = path.join(rpath, 'bin', 'R')
@@ -24,12 +23,11 @@ const shinyAppPath = path.join(app.getAppPath(), 'shiny')
 
 const backgroundColor = '#2c3e50'
 
-// We have to lauch a child process for the R shiny webserver
+// We have to launch a child process for the R shiny webserver
 // Things we need to take into account:
 // The process dies during setup
 // The process dies during app usuage (e.g. the OS kills the process)
 // At the random port, another webserver is running
-
 // at any given time there should be 0 or 1 shiny processes
 let rShinyProcess = null;
 
@@ -38,7 +36,6 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
   app.quit()
 }
 
-// Wait asnychronously
 const waitFor = (milliseconds) => {
   return new Promise((resolve, reject) => {
     setTimeout(resolve, milliseconds)
@@ -143,7 +140,6 @@ let loadingSplashScreen
 let errorSplashScreen
 
 const createWindow = (shinyUrl) => {
-  // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 800,
     height: 600,
@@ -151,17 +147,11 @@ const createWindow = (shinyUrl) => {
     webPreferences: {nodeIntegration: false}
   })
 
-  // and load the index.html of the app.
   mainWindow.loadURL(shinyUrl)
 
-  // Open the DevTools.
   mainWindow.webContents.openDevTools()
 
-  // Emitted when the window is closed.
   mainWindow.on('closed', () => {
-    // Dereference the window object, usually you would store windows
-    // in an array if your app supports multi windows, this is the time
-    // when you should delete the corresponding element.
     mainWindow = null
   })
 }
@@ -209,7 +199,6 @@ app.on('ready', async () => {
     if (!mainWindow) { // fired when we quit the app
       return
     }
-    await emitSpashEvent('failed')
     errorSplashScreen = new BrowserWindow({width: 800,
       height: 600,
       backgroundColor: backgroundColor})
