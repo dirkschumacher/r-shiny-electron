@@ -14,6 +14,9 @@ if (os.platform() === 'win32') {
   throw new Error('OS not supported')
 }
 
+// signal if a shutdown of the app was requested
+let shutdown = false
+
 const rpath = path.join(app.getAppPath(), rPath)
 const libPath = path.join(rpath, 'library')
 const rscript = path.join(rpath, 'bin', 'R')
@@ -81,8 +84,12 @@ const tryStartWebserver = async (attempt, progressCallback, onErrorStartup,
   await progressCallback({attempt: attempt, code: 'start'})
 
   let shinyRunning = false
-  const then = async (_) => {
+  const onError = async (_) => {
     rShinyProcess = null
+    if (shutdown) { // global state :(
+      return
+    }
+    console.error(e)
     if (shinyRunning) {
       await onErrorLater()
     } else {
@@ -100,10 +107,7 @@ const tryStartWebserver = async (attempt, progressCallback, onErrorStartup,
       'R_LIBS': libPath,
       'R_LIBS_USER': libPath,
       'R_LIBS_SITE': libPath,
-      'R_LIB_PATHS': libPath} }).then(then).catch((e) => {
-        console.error(e)
-        then(e)
-      })
+      'R_LIB_PATHS': libPath} }).catch(onError)
 
   let url = `http://127.0.0.1:${shinyPort}`
   for (let i = 0; i <= 10; i++) {
@@ -229,6 +233,7 @@ app.on('window-all-closed', () => {
   // }
   // We overwrite the behaviour for now as it makes things easier
   // remove all events
+  shutdown = true
   app.quit()
 })
 
