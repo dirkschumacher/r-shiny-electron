@@ -103,7 +103,10 @@ const tryStartWebserver = async (attempt, progressCallback, onErrorStartup,
       'R_LIBS': libPath,
       'R_LIBS_USER': libPath,
       'R_LIBS_SITE': libPath,
-      'R_LIB_PATHS': libPath} }).then(then).catch(then)
+      'R_LIB_PATHS': libPath} }).then(then).catch((e) => {
+        console.error(e)
+        then(e)
+      })
 
   let url = `http://127.0.0.1:${shinyPort}`
   for (let i = 0; i <= 10; i++) {
