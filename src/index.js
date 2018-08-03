@@ -18,7 +18,7 @@ if (os.platform() === 'win32') {
 // TODO: detect at runtime which platform we have
 const rpath = path.join(app.getAppPath(), rPath)
 const libPath = path.join(rpath, 'library')
-const rscript = path.join(rpath, 'bin', 'Rscript')
+const rscript = path.join(rpath, 'bin', 'R')
 
 const shinyAppPath = path.join(app.getAppPath(), 'shiny')
 
@@ -87,7 +87,7 @@ const tryStartWebserver = async (attempt, progressCallback, onErrorStartup,
   // changing .lib.loc - same strategy as the checkpoint package
   const libPathEscaped = JSON.stringify(libPath.split('\\').join('/'))
   const shinyAppPathEscaped = JSON.stringify(shinyAppPath.split('\\').join('/'))
-  const rCode = `assign(".lib.loc", ${libPathEscaped}, envir = environment(.libPaths));library(methods);shiny::runaApp(${shinyAppPathEscaped}, port=${shinyPort})`
+  const rCode = `assign(".lib.loc", ${libPathEscaped}, envir = environment(.libPaths));shiny::runApp(${shinyAppPathEscaped}, port=${shinyPort})`
   
   let shinyRunning = false
   const then = async (_) => {
@@ -195,7 +195,6 @@ app.on('ready', async () => {
     loadingSplashScreen = null
   })
   const emitSpashEvent = async (event, data) => {
-    console.log([event, data])
     try {
       await loadingSplashScreen.webContents.send(event, data)
      } catch(e) {}
