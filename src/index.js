@@ -126,9 +126,6 @@ const tryStartWebserver = async (attempt, progressCallback, onErrorStartup,
   try {
     rShinyProcess.kill()
   } catch (e) {}
-  // this triggers the exit callback and ensures, only one process lives
-  // potential problem: what happens if the process never exists?
-  // maybe add a UI warning that you might want to restart the app
 }
 
 // Keep a global reference of the window object, if you don't, the window will

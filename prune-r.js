@@ -14,10 +14,11 @@ const tryRemove = async (path) => {
 module.exports = async (buildPath, _electronVersion, platform, _arch, callback) => {
   const rMacPath = path.join(buildPath, 'r-mac')
   const rWinPath = path.join(buildPath, 'r-win')
+  let removeRPromise
   if (platform === 'darwin') {
-    await tryRemove(rWinPath)
+    removeRPromise = tryRemove(rWinPath)
   } else if (platform === 'win32') { 
-    await tryRemove(rMacPath)
+    removeRPromise = tryRemove(rMacPath)
   } else {
     throw new Error('Platform is not supported')
   }
@@ -27,6 +28,6 @@ module.exports = async (buildPath, _electronVersion, platform, _arch, callback) 
                          'Dockerfile',
                          'add-cran-binary-pkgs.R']
   const deleteAllFiles = filesToDelete.map((f) => path.join(buildPath, f)).map(tryRemove)
-  await Promise.all(deleteAllFiles)
+  await Promise.all([removeRPromise, deleteAllFiles])
   callback()
 }
