@@ -80,11 +80,6 @@ const tryStartWebserver = async (attempt, progressCallback, onErrorStartup,
 
   await progressCallback({attempt: attempt, code: 'start'})
 
-  // changing .lib.loc - same strategy as the checkpoint package
-  const libPathEscaped = JSON.stringify(libPath.split('\\').join('/'))
-  const shinyAppPathEscaped = JSON.stringify(shinyAppPath.split('\\').join('/'))
-  const rCode = `assign(".lib.loc", ${libPathEscaped}, envir = environment(.libPaths));shiny::runApp(${shinyAppPathEscaped}, port=${shinyPort})`
-
   let shinyRunning = false
   const then = async (_) => {
     rShinyProcess = null
@@ -96,10 +91,12 @@ const tryStartWebserver = async (attempt, progressCallback, onErrorStartup,
   }
 
   rShinyProcess = execa(rscript,
-    ['--vanilla', '-e', rCode],
+    ['--vanilla', '-f', path.join(app.getAppPath(), 'start-shiny.R')],
     { env: {
       'RHOME': rpath,
       'R_HOME_DIR': rpath,
+      'RE_SHINY_PORT': shinyPort,
+      'RE_SHINY_PATH': shinyAppPath,
       'R_LIBS': libPath,
       'R_LIBS_USER': libPath,
       'R_LIBS_SITE': libPath,
