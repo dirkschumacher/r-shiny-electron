@@ -102,6 +102,8 @@ const tryStartWebserver = async (attempt, progressCallback, onErrorStartup,
   rShinyProcess = execa(rscript,
     ['--vanilla', '-e', rCode],
     { env: {
+      'RHOME': rpath,
+      'R_HOME_DIR': rpath,
       'R_LIBS': libPath,
       'R_LIBS_USER': libPath,
       'R_LIBS_SITE': libPath,
