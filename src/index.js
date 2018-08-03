@@ -1,9 +1,10 @@
 import { app, session, BrowserWindow } from 'electron'
 
-import execa from 'execa'
+import {spawn, ChildProcess} from 'child_process'
 import path from 'path'
 import http from 'axios'
 import os from 'os'
+import execa from 'execa'
 
 let rPath
 if (os.platform() === 'win32') {
@@ -17,11 +18,20 @@ if (os.platform() === 'win32') {
 // TODO: detect at runtime which platform we have
 const rpath = path.join(app.getAppPath(), rPath)
 const libPath = path.join(rpath, 'library')
-const rscript = path.join(rpath, 'bin', 'Rscript')
+const rscript = path.join(rpath, 'bin', 'R')
 
 const shinyAppPath = path.join(app.getAppPath(), 'shiny')
 
 const backgroundColor = '#2c3e50'
+
+// We have to lauch a child process for the R shiny webserver
+// Things we need to take into account:
+// The process dies during setup
+// The process dies during app usuage (e.g. the OS kills the process)
+// At the random port, another webserver is running
+
+// at any given time there should be 0 or 1 shiny processes
+let rShinyProcess = null;
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -51,19 +61,45 @@ const randomPort = () => {
   }
 }
 
-// Start the webserver
-const startWebserver = async (attempt, progressCallback) => {
+// tries to start a webserver
+// attempt - a counter how often it was attempted to start a webserver
+// use the progress call back to listen for intermediate status reports
+// use the onErrorStartup callback to react to a critical failure during startup
+// use the onErrorLater callback to handle the case when the R process dies
+// use onSuccess to retrieve the shinyUrl
+const tryStartWebserver = async (attempt, progressCallback, onErrorStartup, 
+                                 onErrorLater, onSuccess)  => {
   if (attempt > 3) {
     await progressCallback({attempt: attempt, code: 'failed'})
-    throw new Error('Cannot start webserver')
+    await onErrorStartup()
+    return
+  }
+
+  if (rShinyProcess !== null) {
+    await onErrorStartup() // should not happen
+    return
   }
 
   let shinyPort = randomPort()
 
   await progressCallback({attempt: attempt, code: 'start'})
+
   // changing .lib.loc - same strategy as the checkpoint package
-  const rCode = `assign('.lib.loc', '${libPath}', envir = environment(.libPaths));library(methods);shiny::runApp('${shinyAppPath}', port=${shinyPort})`
-  execa(rscript,
+  const libPathEscaped = JSON.stringify(libPath.split('\\').join('/'))
+  const shinyAppPathEscaped = JSON.stringify(shinyAppPath.split('\\').join('/'))
+  const rCode = `assign(".lib.loc", ${libPathEscaped}, envir = environment(.libPaths));shiny::runApp(${shinyAppPathEscaped}, port=${shinyPort})`
+  
+  let shinyRunning = false
+  const then = async (_) => {
+    rShinyProcess = null
+    if (shinyRunning) {
+      await onErrorLater()
+    } else {
+      await tryStartWebserver(attempt + 1, progressCallback, onErrorStartup, onErrorLater, onSuccess)
+    }
+  }
+  
+  rShinyProcess = execa(rscript,
     ['--vanilla', '-e', rCode],
     { env: {
       'RHOME': rpath,
@@ -71,23 +107,20 @@ const startWebserver = async (attempt, progressCallback) => {
       'R_LIBS': libPath,
       'R_LIBS_USER': libPath,
       'R_LIBS_SITE': libPath,
-      'R_LIB_PATHS': libPath} }) // which ones do we actually need?
-    .catch(console.error)
-
-  // TODO: handle the case the port is taken and
-  // shiny fails
+      'R_LIB_PATHS': libPath} }).then(then).catch(then)
 
 
   let url = `http://127.0.0.1:${shinyPort}`
   for (let i = 0; i <= 10; i++) {
-    await progressCallback({attempt: attempt, code: 'waiting'})
     await waitFor(500)
     try {
       const res = await http.head(url, {timeout: 1000})
       // TODO: check that it is really shiny and not some other webserver
       if (res.status === 200) {
         await progressCallback({attempt: attempt, code: 'success'})
-        return url
+        shinyRunning = true
+        onSuccess(url)
+        return
       }
     } catch (e) {
 
@@ -95,18 +128,21 @@ const startWebserver = async (attempt, progressCallback) => {
   }
   await progressCallback({attempt: attempt, code: 'notresponding'})
 
-  // kill process
-  // not sure execa is the right package for it
-  return startWebserver(attempt + 1, progressCallback)
+  try{
+    rShinyProcess.kill()
+  } catch(e) {}
+  // this triggers the exit callback and ensures, only one process lives
+  // potential problem: what happens if the process never exists?
+  // maybe add a UI warning that you might want to restart the app
 }
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
-let splashScreen
-let shinyUrl
+let loadingSplashScreen
+let errorSplashScreen
 
-const createWindow = () => {
+const createWindow = (shinyUrl) => {
   // Create the browser window.
   mainWindow = new BrowserWindow({
     width: 800,
@@ -151,22 +187,53 @@ app.on('ready', async () => {
     callback(false)
   })
 
-  splashScreen = new BrowserWindow({width: 800,
-    height: 600,
-    backgroundColor: backgroundColor})
-  splashScreen.loadURL(`file://${__dirname}/loading.html`)
-
-  // pass the loading events down to the splashScreen window
-  const progressCallback = async (event) => {
-    await splashScreen.webContents.send('start-webserver-event', event)
+  loadingSplashScreen = new BrowserWindow({width: 800,
+                                    height: 600,
+                                    backgroundColor: backgroundColor})
+  loadingSplashScreen.loadURL(`file://${__dirname}/loading.html`)
+  loadingSplashScreen.on('closed', () => {
+    loadingSplashScreen = null
+  })
+  const emitSpashEvent = async (event, data) => {
+    try {
+      await loadingSplashScreen.webContents.send(event, data)
+     } catch(e) {}
   }
+
+  // pass the loading events down to the loadingSplashScreen window
+  const progressCallback = async (event) => {
+    await emitSpashEvent('start-webserver-event', event)
+  } 
+
+  const onErrorLater = async () => {
+    if (!mainWindow) { // fired when we quit the app
+      return
+    }
+    await emitSpashEvent('failed')
+    errorSplashScreen = new BrowserWindow({width: 800,
+      height: 600,
+      backgroundColor: backgroundColor})
+    errorSplashScreen.loadURL(`file://${__dirname}/failed.html`)
+    errorSplashScreen.on('closed', () => {
+      errorSplashScreen = null
+    })
+    await errorSplashScreen.show()
+    mainWindow.destroy()
+  }
+
+  const onErrorStartup = async () => {
+    await emitSpashEvent('failed')
+  }
+
   try {
-    shinyUrl = await startWebserver(0, progressCallback)
-    createWindow()
-    splashScreen.destroy()
-    mainWindow.show()
+    await tryStartWebserver(0, progressCallback, onErrorStartup, onErrorLater, (url) => {
+      createWindow(url)
+      loadingSplashScreen.destroy()
+      loadingSplashScreen = null
+      mainWindow.show()
+    })
   } catch (e) {
-    await splashScreen.webContents.send('failed')
+    await emitSpashEvent('failed')
   }
 })
 
@@ -177,6 +244,7 @@ app.on('window-all-closed', () => {
   // if (process.platform !== 'darwin') {
   // }
   // We overwrite the behaviour for now as it makes things easier
+  // remove all events
   app.quit()
 })
 
