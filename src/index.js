@@ -149,7 +149,7 @@ const createWindow = (shinyUrl) => {
 
   mainWindow.loadURL(shinyUrl)
 
-  mainWindow.webContents.openDevTools()
+  // mainWindow.webContents.openDevTools()
 
   mainWindow.on('closed', () => {
     mainWindow = null
