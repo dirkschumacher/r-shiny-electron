@@ -156,6 +156,26 @@ const createWindow = (shinyUrl) => {
   })
 }
 
+const createLoadingSplashScreen = () => {
+  loadingSplashScreen = new BrowserWindow({width: 800,
+    height: 600,
+    backgroundColor: backgroundColor})
+  loadingSplashScreen.loadURL(`file://${__dirname}/loading.html`)
+  loadingSplashScreen.on('closed', () => {
+    loadingSplashScreen = null
+  })
+}
+
+const createErrorScreen = () => {
+  errorSplashScreen = new BrowserWindow({width: 800,
+    height: 600,
+    backgroundColor: backgroundColor})
+  errorSplashScreen.loadURL(`file://${__dirname}/failed.html`)
+  errorSplashScreen.on('closed', () => {
+    errorSplashScreen = null
+  })
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -177,13 +197,8 @@ app.on('ready', async () => {
     callback(false)
   })
 
-  loadingSplashScreen = new BrowserWindow({width: 800,
-    height: 600,
-    backgroundColor: backgroundColor})
-  loadingSplashScreen.loadURL(`file://${__dirname}/loading.html`)
-  loadingSplashScreen.on('closed', () => {
-    loadingSplashScreen = null
-  })
+  createLoadingSplashScreen()
+
   const emitSpashEvent = async (event, data) => {
     try {
       await loadingSplashScreen.webContents.send(event, data)
@@ -199,13 +214,7 @@ app.on('ready', async () => {
     if (!mainWindow) { // fired when we quit the app
       return
     }
-    errorSplashScreen = new BrowserWindow({width: 800,
-      height: 600,
-      backgroundColor: backgroundColor})
-    errorSplashScreen.loadURL(`file://${__dirname}/failed.html`)
-    errorSplashScreen.on('closed', () => {
-      errorSplashScreen = null
-    })
+    createErrorScreen()
     await errorSplashScreen.show()
     mainWindow.destroy()
   }
@@ -241,7 +250,8 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  if (mainWindow === null) {
-    createWindow()
-  }
+  //if (mainWindow === null) {
+  //  createWindow()
+  //}
+  // Deactivated for now
 })
