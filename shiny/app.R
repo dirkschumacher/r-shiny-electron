@@ -44,11 +44,13 @@ server <- function(input, output, session) {
     hist(x, breaks = bins, col = 'darkgray', border = 'white')
   })
 
-  # needed for windows apps. As soons as the session ends
-  # we end the process and terminate the R process
-  session$onSessionEnded(function() {
-    stopApp()
-  })
+  if (Sys.getenv("WITHIN_ELECTRON") == "1") {
+    # needed for windows apps. As soons as the session ends
+    # we end the process and terminate the R process
+    session$onSessionEnded(function() {
+      stopApp()
+    })
+  }
 }
 
 # Run the application 
