@@ -100,6 +100,7 @@ const tryStartWebserver = async (attempt, progressCallback, onErrorStartup,
   rShinyProcess = execa(rscript,
     ['--vanilla', '-f', path.join(app.getAppPath(), 'start-shiny.R')],
     { env: {
+      'WITHIN_ELECTRON': '1', // can be used within an app to implement specific behaviour
       'RHOME': rpath,
       'R_HOME_DIR': rpath,
       'RE_SHINY_PORT': shinyPort,
