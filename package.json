@@ -27,6 +27,7 @@
       },
       "electronPackagerConfig": {
         "packageManager": "npm",
+        "asar": true,
         "afterCopy": [
           "./prune-r"
         ]
