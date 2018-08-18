@@ -27,15 +27,15 @@
       },
       "electronPackagerConfig": {
         "packageManager": "npm",
-        "asar": true,
+        "asar": {
+          "unpackDir": "**/{r-win,r-mac,shiny}"
+        },
         "afterCopy": [
           "./prune-r"
         ]
       },
       "electronWinstallerConfig": {
-        "name": "r_shiny_electron",
-        "noMsi": false,
-        "noDelta": true
+        "name": "r_shiny_electron"
       },
       "electronInstallerDebian": {},
       "electronInstallerRedhat": {},
