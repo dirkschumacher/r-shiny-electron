@@ -2,6 +2,8 @@
 
 This is a work in progress template for R shiny and electron integration
 
+_NOT FOR PRODUCTION_
+
 ## Quickstart
 
 * Clone
