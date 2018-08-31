@@ -144,7 +144,10 @@ const createWindow = (shinyUrl) => {
     width: 800,
     height: 600,
     show: false,
-    webPreferences: {nodeIntegration: false}
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true
+    }
   })
 
   mainWindow.loadURL(shinyUrl)
