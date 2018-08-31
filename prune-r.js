@@ -25,6 +25,8 @@ module.exports = async (buildPath, _electronVersion, platform, _arch, callback) 
   const filesToDelete = ['prune-r.js',
                          'get-r-mac.sh',
                          'get-r-win.sh',
+                         'docs',
+                         'README.md',
                          'Dockerfile',
                          'add-cran-binary-pkgs.R']
   const deleteAllFiles = filesToDelete.map((f) => path.join(buildPath, f)).map(tryRemove)
