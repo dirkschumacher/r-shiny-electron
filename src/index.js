@@ -84,12 +84,12 @@ const tryStartWebserver = async (attempt, progressCallback, onErrorStartup,
   await progressCallback({attempt: attempt, code: 'start'})
 
   let shinyRunning = false
-  const onError = async (_) => {
+  const onError = async (e) => {
+    console.error(e)
     rShinyProcess = null
     if (shutdown) { // global state :(
       return
     }
-    console.error(e)
     if (shinyRunning) {
       await onErrorLater()
     } else {
