@@ -12,6 +12,10 @@ _NOT FOR PRODUCTION_
 * Download shiny `Rscript add-cran-binary-pkgs.R`
 * `npm start`
 
+## Contribute
+
+If you like to contribute, please take a look at the issues. It is all work in progress and early stage but ideas and code is always welcome. Ideally please make an issue before you send a larger PR.
+
 ## App
 
 The app currently starts with a loading screen while trying to start the shiny app as a seperate process. If successful, it will switch to the shiny app once it is loaded. If not successful after 3 trys and error is shown.
