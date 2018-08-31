@@ -27,9 +27,6 @@
       },
       "electronPackagerConfig": {
         "packageManager": "npm",
-        "asar": {
-          "unpackDir": "**/{r-win,r-mac,shiny}"
-        },
         "afterCopy": [
           "./prune-r"
         ]
@@ -40,7 +37,7 @@
       "electronInstallerDebian": {},
       "electronInstallerRedhat": {},
       "github_repository": {
-        "owner": "dirkschumacher",
+        "owner": "githubusername",
         "name": "r-shiny-electron"
       },
       "windowsStoreConfig": {
