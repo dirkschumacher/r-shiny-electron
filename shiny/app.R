@@ -28,7 +28,12 @@ ui <- fluidPage(
       
       # Show a plot of the generated distribution
       mainPanel(
-         plotOutput("distPlot")
+         plotOutput("distPlot"),
+         hr(),
+         h4("R.home()"),
+         textOutput("rHome"),
+         h4(".libPaths()"),
+         textOutput("libPath")
       )
    )
 )
@@ -44,6 +49,9 @@ server <- function(input, output, session) {
     # draw the histogram with the specified number of bins
     hist(x, breaks = bins, col = 'darkgray', border = 'white')
   })
+
+  output$rHome <- renderText(R.home())
+  output$libPath <- renderText(.libPaths())
 
   if (Sys.getenv("WITHIN_ELECTRON") == "1") {
     # needed for windows apps. As soons as the session ends
