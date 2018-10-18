@@ -15,11 +15,11 @@ mv R.framework/Versions/Current/Resources/* .
 rm -r r.pkg R.framework
 
 # Patch the main R script
-sed -i.bak '/^R_HOME_DIR=/d' r-mac/bin/R
+sed -i.bak '/^R_HOME_DIR=/d' bin/R
 sed -i.bak 's;/Library/Frameworks/R.framework/Resources;${R_HOME};g' \
-    r-mac/bin/R
-chmod +x r-mac/bin/R
-rm -f r-mac/bin/R.bak
+    bin/R
+chmod +x bin/R
+rm -f bin/R.bak
 
 # Remove unneccessary files TODO: What else
 rm -r doc tests

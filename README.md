@@ -8,7 +8,7 @@ _NOT FOR PRODUCTION_
 
 * Clone
 * `npm install`
-* Download mac binaries `sh get-r-mac.sh`
+* Download mac binaries `./get-r-mac.sh`
 * Download shiny `Rscript add-cran-binary-pkgs.R`
 * `npm start`
 
