@@ -30,6 +30,6 @@ module.exports = async (buildPath, _electronVersion, platform, _arch, callback) 
                          'Dockerfile',
                          'add-cran-binary-pkgs.R']
   const deleteAllFiles = filesToDelete.map((f) => path.join(buildPath, f)).map(tryRemove)
-  await Promise.all([removeRPromise, deleteAllFiles])
+  await Promise.all(deleteAllFiles.concat([removeRPromise]))
   callback()
 }
