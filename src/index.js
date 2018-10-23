@@ -97,6 +97,7 @@ const tryStartWebserver = async (attempt, progressCallback, onErrorStartup,
     }
   }
 
+  let shinyProcessAlreadyDead = false
   rShinyProcess = execa(rscript,
     ['--vanilla', '-f', path.join(app.getAppPath(), 'start-shiny.R')],
     { env: {
@@ -108,10 +109,16 @@ const tryStartWebserver = async (attempt, progressCallback, onErrorStartup,
       'R_LIBS': libPath,
       'R_LIBS_USER': libPath,
       'R_LIBS_SITE': libPath,
-      'R_LIB_PATHS': libPath} }).catch(onError)
+      'R_LIB_PATHS': libPath} }).catch((e) => {
+        shinyProcessAlreadyDead = true
+        onError(e)
+      })
 
   let url = `http://127.0.0.1:${shinyPort}`
   for (let i = 0; i <= 10; i++) {
+    if (shinyProcessAlreadyDead) {
+      break
+    }
     await waitFor(500)
     try {
       const res = await http.head(url, {timeout: 1000})
@@ -223,6 +230,7 @@ app.on('ready', async () => {
   }
 
   const onErrorStartup = async () => {
+    await waitFor(1000) // TODO: hack, only emit if the loading screen is ready
     await emitSpashEvent('failed')
   }
 
