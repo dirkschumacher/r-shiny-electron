@@ -15,6 +15,7 @@ if (os.platform() === 'win32') {
 }
 
 // signal if a shutdown of the app was requested
+// this is used to prevent an error window once the R session dies
 let shutdown = false
 
 const rpath = path.join(app.getAppPath(), rPath)
@@ -256,6 +257,12 @@ app.on('window-all-closed', () => {
   // remove all events
   shutdown = true
   app.quit()
+
+  // kill the process, just in case
+  // usually happens automatically if the main process is killed
+  try {
+    rShinyProcess.kill()
+  } catch (e) {}
 })
 
 app.on('activate', () => {
