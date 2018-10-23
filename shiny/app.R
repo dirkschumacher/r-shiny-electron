@@ -33,7 +33,9 @@ ui <- fluidPage(
          h4("R.home()"),
          textOutput("rHome"),
          h4(".libPaths()"),
-         textOutput("libPath")
+         textOutput("libPath"),
+         h4("sessionInfo()"),
+         verbatimTextOutput("sessionInfo")
       )
    )
 )
@@ -52,6 +54,7 @@ server <- function(input, output, session) {
 
   output$rHome <- renderText(R.home())
   output$libPath <- renderText(.libPaths())
+  output$sessionInfo <- renderPrint(print(sessionInfo()))
 
   if (Sys.getenv("WITHIN_ELECTRON") == "1") {
     # needed for windows apps. As soons as the session ends
