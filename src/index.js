@@ -40,7 +40,7 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 }
 
 const waitFor = (milliseconds) => {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, _reject) => {
     setTimeout(resolve, milliseconds)
   })
 }
