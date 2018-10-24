@@ -4,16 +4,9 @@ import path from 'path'
 import http from 'axios'
 import os from 'os'
 import execa from 'execa'
-import { randomPort, waitFor } from './helpers'
+import { randomPort, waitFor, getRPath } from './helpers'
 
-let rPath
-if (os.platform() === 'win32') {
-  rPath = 'r-win'
-} else if (os.platform() === 'darwin') {
-  rPath = 'r-mac'
-} else {
-  throw new Error('OS not supported')
-}
+const rPath = getRPath(os.platform())
 
 // signal if a shutdown of the app was requested
 // this is used to prevent an error window once the R session dies

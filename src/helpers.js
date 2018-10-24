@@ -19,3 +19,13 @@ export const waitFor = (milliseconds) => {
     setTimeout(resolve, milliseconds);
   })
 }
+
+export const getRPath = (platform) => {
+  if (platform === 'win32') {
+    return 'r-win'
+  } else if (platform === 'darwin') {
+    return 'r-mac'
+  } else {
+    throw new Error('OS not supported')
+  }
+}
