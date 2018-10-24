@@ -167,24 +167,27 @@ const createWindow = (shinyUrl) => {
   })
 }
 
-const createLoadingSplashScreen = () => {
-  loadingSplashScreen = new BrowserWindow({width: 800,
-    height: 600,
-    backgroundColor: backgroundColor})
-  loadingSplashScreen.loadURL(`file://${__dirname}/loading.html`)
-  loadingSplashScreen.on('closed', () => {
-    loadingSplashScreen = null
+const splashScreenOptions = {
+  width: 800,
+  height: 600,
+  backgroundColor: backgroundColor
+}
+
+const createSplashScreen = (filename) => {
+  const splashScreen = new BrowserWindow(splashScreenOptions)
+  splashScreen.loadURL(`file://${__dirname}/${filename}.html`)
+  splashScreen.on('closed', () => {
+    splashScreen = null
   })
+  return splashScreen
+}
+
+const createLoadingSplashScreen = () => {
+  loadingSplashScreen = createSplashScreen('loading')
 }
 
 const createErrorScreen = () => {
-  errorSplashScreen = new BrowserWindow({width: 800,
-    height: 600,
-    backgroundColor: backgroundColor})
-  errorSplashScreen.loadURL(`file://${__dirname}/failed.html`)
-  errorSplashScreen.on('closed', () => {
-    errorSplashScreen = null
-  })
+  errorSplashScreen = createSplashScreen('failed')
 }
 
 // This method will be called when Electron has finished
