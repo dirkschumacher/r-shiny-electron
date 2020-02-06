@@ -146,7 +146,7 @@ const splashScreenOptions = {
 }
 
 const createSplashScreen = (filename) => {
-  const splashScreen = new BrowserWindow(splashScreenOptions)
+  let splashScreen = new BrowserWindow(splashScreenOptions)
   splashScreen.loadURL(`file://${__dirname}/${filename}.html`)
   splashScreen.on('closed', () => {
     splashScreen = null
