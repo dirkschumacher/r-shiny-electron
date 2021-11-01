@@ -4,6 +4,8 @@ This is a work in progress template for R shiny and electron integration
 
 _NOT FOR PRODUCTION_
 
+Not under development anymore. Feel free to fork it.
+
 ## Quickstart
 
 * Clone
